@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: ankane/pgvector  # Official pgvector docker image, with PostgreSQL + pgvector installed
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: 12345678
+      POSTGRES_DB: rag_test_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

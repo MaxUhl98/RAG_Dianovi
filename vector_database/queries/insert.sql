@@ -1,0 +1,1 @@
+INSERT INTO rag_test (document_title, section_title, headings, embedded_text, embedding, text_content, is_table, document_filename, page_number)  VALUES %s
