@@ -2,12 +2,55 @@ import fitz
 from collections import defaultdict
 from typing import Any
 import re
+from rag_configuration import CFG
 
-def contains_valid_word_like_sequence(input_string:str) -> bool:
-    # This regex matches sequences of letters (a-z, A-Z) while ignoring whitespace and non-letter characters
+def get_title(pdf_path: str, config: CFG = CFG()) -> str:
+    """
+    Extracts and formats the title of the document from the PDF file path
+    based on a specified pattern in the configuration.
+
+    :param pdf_path: The file path of the PDF document.
+    :param config: A configuration object containing the filename pattern.
+                   Defaults to an instance of CFG.
+    :return: The title of the document, with hyphens and underscores replaced
+             by spaces.
+    """
+    return re.search(config.filename_pattern, pdf_path).group(1).replace('-', ' ').replace('_', ' ')
+
+
+def contains_valid_word_like_sequence(input_string: str) -> bool:
+    """
+    Checks if the input string contains any word-like sequence of letters,
+    disregarding non-letter characters and whitespace.
+
+    :param input_string: The string to be checked.
+    :return: True if there is a sequence of letters (a-z or A-Z) in the string,
+             otherwise False.
+    """
     pattern = r'[a-zA-Z]+'
-    # Search for any valid word-like sequence in the string
     return bool(re.search(pattern, input_string))
+
+
+def extract_line_contents(line: Any, data: list[dict[str, Any]], page_num: int) -> list[dict[str, Any]]:
+    """
+    Extracts text and font information from each span within a line and
+    appends valid spans to the data list if they contain word-like sequences
+    or are not in bold font.
+
+    :param line: A line object containing text spans, typically from a PDF page.
+    :param data: A list of dictionaries holding extracted text data.
+    :param page_num: The page number (0-indexed) from which the line was read.
+    :return: The updated list of dictionaries, each representing a span with
+             text, font, and page information.
+    """
+    for span in line["spans"]:
+        text = span['text']
+        font = span['font']
+        if contains_valid_word_like_sequence(text) or 'bold' not in font.lower():
+            data.append({'text': text, 'font': font, 'page': page_num})
+    return data
+
+
 
 def extract_document_data(pdf_path: str) -> list[dict[str, Any]]:
     """
@@ -30,13 +73,11 @@ def extract_document_data(pdf_path: str) -> list[dict[str, Any]]:
         for block in blocks:
             if "lines" in block:
                 for line in block["lines"]:
-                    for span in line["spans"]:
-                        text = span['text']
-                        font = span['font']
-                        if contains_valid_word_like_sequence(text) or not 'bold' in font.lower():
-                            data.append({'text': text, 'font': font, 'page': page_num})
+                    data = extract_line_contents(line,data, page_num)
     doc.close()
     return data
+
+
 
 def get_section_maps(data: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:
     """
