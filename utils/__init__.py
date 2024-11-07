@@ -1,1 +1,1 @@
-from utils.text_preprocessing import get_document_maps
+from utils.text_preprocessing import get_document_maps, get_title
