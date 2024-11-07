@@ -1,1 +1,2 @@
 from utils.text_preprocessing import get_document_maps, get_title
+from utils.extracted_content import ExtractedContent
