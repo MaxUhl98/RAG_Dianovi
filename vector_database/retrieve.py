@@ -31,7 +31,7 @@ def retrieve_elements(user_query:str, model:Any, config:VectorStoreConfig=Vector
 
 def get_reranked_documents(query: str, embedder: Any, reranker: Any, config: CFG = CFG()) -> pd.DataFrame:
     """
-    Retrieves and reranks documents based on their relevance to a specified query.
+    Retrieves and reranks documents based on their relevance to the specified query.
 
     This function first retrieves a list of documents using an embedding-based retrieval model
     by calculating cosine similarities between the query and document embeddings. After retrieval,
